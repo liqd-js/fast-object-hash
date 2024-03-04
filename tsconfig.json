@@ -12,7 +12,7 @@
     "strict": true,                               
     "skipLibCheck": true,                         
     "lib": ["esnext"],
-    "module": "esnext",
+    "module": "commonjs",
     "target": "esnext",
     "moduleResolution": "node",
     "declarationMap": true,
