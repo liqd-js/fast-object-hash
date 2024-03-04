@@ -31,33 +31,33 @@ function getIndexHash( val: Function | object ): string
     return HashIndex.get( val )!;
 }
 
-function stableStringify( obj: any, sort: boolean, visited: Set<any> ): string
+export function objectStringify( obj: any, sort: boolean, visited: Set<any> ): string
 {
     if( typeof obj === 'undefined' ){ return '' }
     if( typeof obj !== 'object' || obj === null ){ return JSON.stringify( obj )}
     if( obj instanceof Function ){ return getIndexHash( obj )}
     if( obj instanceof Date ){ return obj.toISOString()}
     if( obj instanceof RegExp ){ return obj.toString()}
-    if( obj instanceof Set ){ return stableStringify([...obj], true, visited )}
-    if( obj instanceof Map ){ return stableStringify( Object.fromEntries([...obj.entries()]), true, visited )}
+    if( obj instanceof Set ){ return objectStringify([...obj], true, visited )}
+    if( obj instanceof Map ){ return objectStringify( Object.fromEntries([...obj.entries()]), true, visited )}
 
     if( visited.has( obj )){ return '*Circular*' } visited.add( obj );
 
     if( Array.isArray( obj ))
     {
-        const arr = obj.map( v => stableStringify( v, sort, visited )); sort && arr.sort();
+        const arr = obj.map( v => objectStringify( v, sort, visited )); sort && arr.sort();
 
         return `[${ arr.join(',') }]`;
     }
     if( obj.constructor !== Object ){ return getIndexHash( obj )}
 
-    const pairs = Object.keys( obj ).sort().map( key => `${ JSON.stringify( key ) }:${ stableStringify( obj[key], sort, visited )}`);
+    const pairs = Object.keys( obj ).sort().map( key => `${ JSON.stringify( key ) }:${ objectStringify( obj[key], sort, visited )}`);
 
     return `{${ pairs.join(',') }}`;
 }
 
 export default function objectHash( obj: any ): string
 {
-    const [ h2, h1 ] = cyrb64( stableStringify( obj, false, new Set() ), 0 );
+    const [ h2, h1 ] = cyrb64( objectStringify( obj, false, new Set() ), 0 );
     return h2.toString(36).padStart( 7, '0' ) + h1.toString(36).padStart( 7, '0' );
 }
