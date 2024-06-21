@@ -41,7 +41,12 @@ function compareKeys( a: any[], b: any[] )
     return a[0] === b[0] ? 0 : a[0] > b[0] ? 1 : -1;
 }
 
-type ObjectStringifyOptions = { sortArrays: boolean, ignoreUndefinedProperties: boolean };
+type ObjectStringifyOptions = 
+{
+    sortArrays: boolean,
+    ignoreUndefinedProperties: boolean,
+    toString?: ( obj: object ) => string | undefined
+};
 
 function _objectStringify( obj: any, visited: Set<any>, options: ObjectStringifyOptions ): string
 {
@@ -60,6 +65,12 @@ function _objectStringify( obj: any, visited: Set<any>, options: ObjectStringify
             .map(([ key, value ]) => 
                 `${ JSON.stringify( key ) }:${ _objectStringify( value, visited, options )}`)
             .join(',') + ')';
+    }
+    if( options.toString )
+    {
+        const str = options.toString( obj );
+
+        if( str !== undefined ){ return str }
     }
 
     if( visited.has( obj )){ return '*Circular*' } visited.add( obj );
@@ -81,15 +92,15 @@ function _objectStringify( obj: any, visited: Set<any>, options: ObjectStringify
 
 export function objectStringify( obj: any, options: Partial<ObjectStringifyOptions> = {}): string
 {
-    const { sortArrays = false, ignoreUndefinedProperties = true } = options;
+    const { sortArrays = false, ignoreUndefinedProperties = true, toString } = options;
 
-    return _objectStringify( obj, new Set(), { sortArrays, ignoreUndefinedProperties });
+    return _objectStringify( obj, new Set(), { sortArrays, ignoreUndefinedProperties, toString });
 }
-
+ 
 export default function objectHash( obj: any, options: Partial<ObjectStringifyOptions> = {}): string
 {
-    const { sortArrays = false, ignoreUndefinedProperties = true } = options;
+    const { sortArrays = false, ignoreUndefinedProperties = true, toString } = options;
 
-    const [ h2, h1 ] = cyrb64( _objectStringify( obj, new Set(), { sortArrays, ignoreUndefinedProperties }), 0 );
+    const [ h2, h1 ] = cyrb64( _objectStringify( obj, new Set(), { sortArrays, ignoreUndefinedProperties, toString }), 0 );
     return h2.toString(36).padStart( 7, '0' ) + h1.toString(36).padStart( 7, '0' );
 }
