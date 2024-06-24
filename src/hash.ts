@@ -45,7 +45,7 @@ type ObjectStringifyOptions =
 {
     sortArrays: boolean,
     ignoreUndefinedProperties: boolean,
-    toString?: ( obj: object ) => string | undefined
+    stringify?: ( obj: object ) => string | undefined
 };
 
 function _objectStringify( obj: any, visited: Set<any>, options: ObjectStringifyOptions ): string
@@ -66,9 +66,9 @@ function _objectStringify( obj: any, visited: Set<any>, options: ObjectStringify
                 `${ JSON.stringify( key ) }:${ _objectStringify( value, visited, options )}`)
             .join(',') + ')';
     }
-    if( options.toString )
+    if( options.stringify )
     {
-        const str = options.toString( obj );
+        const str = options.stringify( obj );
 
         if( str !== undefined ){ return str }
     }
@@ -92,15 +92,15 @@ function _objectStringify( obj: any, visited: Set<any>, options: ObjectStringify
 
 export function objectStringify( obj: any, options: Partial<ObjectStringifyOptions> = {}): string
 {
-    const { sortArrays = false, ignoreUndefinedProperties = true, toString } = options;
+    const { sortArrays = false, ignoreUndefinedProperties = true, stringify } = options;
 
-    return _objectStringify( obj, new Set(), { sortArrays, ignoreUndefinedProperties, toString });
+    return _objectStringify( obj, new Set(), { sortArrays, ignoreUndefinedProperties, stringify });
 }
  
 export default function objectHash( obj: any, options: Partial<ObjectStringifyOptions> = {}): string
 {
-    const { sortArrays = false, ignoreUndefinedProperties = true, toString } = options;
+    const { sortArrays = false, ignoreUndefinedProperties = true, stringify } = options;
 
-    const [ h2, h1 ] = cyrb64( _objectStringify( obj, new Set(), { sortArrays, ignoreUndefinedProperties, toString }), 0 );
+    const [ h2, h1 ] = cyrb64( _objectStringify( obj, new Set(), { sortArrays, ignoreUndefinedProperties, stringify }), 0 );
     return h2.toString(36).padStart( 7, '0' ) + h1.toString(36).padStart( 7, '0' );
 }
